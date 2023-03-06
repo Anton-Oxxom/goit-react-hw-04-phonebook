@@ -1,1 +1,1 @@
-export { ContactFilter } from './contactFilter';
+export { ContactFilter } from './contactFilter.jsx';

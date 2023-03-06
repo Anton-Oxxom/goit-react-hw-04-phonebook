@@ -1,84 +1,58 @@
-import { Component } from 'react';
-import { ContactForm } from './contactForm/contactForm';
-import { ContactsList } from './contactList/contactList';
-import { Filter } from './contactFilter/contactFilter';
+import { useState, useEffect } from 'react';
+import { ContactForm } from './СontactForm';
+import { ContactsList } from './СontactList';
+import { Filter } from './СontactFilter';
 import Notiflix from 'notiflix';
 
-export class App extends Component {
-  state = {
-    contacts: [
-      { id: 'id-1', name: 'Rosie Simpson', number: '459-12-56' },
-      { id: 'id-2', name: 'Hermione Kline', number: '443-89-12' },
-      { id: 'id-3', name: 'Eden Clements', number: '645-17-79' },
-      { id: 'id-4', name: 'Annie Copeland', number: '227-91-26' },
-    ],
-    filter: '',
-  };
+const defaultContacts = [
+  { id: 'id-1', name: 'Rosie Simpson', number: '459-12-56' },
+  { id: 'id-2', name: 'Hermione Kline', number: '443-89-12' },
+  { id: 'id-3', name: 'Eden Clements', number: '645-17-79' },
+  { id: 'id-4', name: 'Annie Copeland', number: '227-91-26' },
+];
 
-  componentDidMount() {
-    const contacts = localStorage.getItem('Contacts');
-    const parsedContacts = JSON.parse(contacts);
-    if (parsedContacts) {
-      this.setState({
-        contacts: parsedContacts,
-      });
-    }
-  }
+export const App = () => {
+  const [contacts, setContacts] = useState(
+    () => JSON.parse(window.localStorage.getItem('Contacts')) ?? defaultContacts
+  );
+  const [filter, setFilter] = useState('');
 
-  componentDidUpdate(prevState) {
-    const { contacts } = this.state;
-    if (contacts !== prevState.contacts) {
-      localStorage.setItem('Contacts', JSON.stringify(contacts));
-    }
-  }
+  useEffect(() => {
+    window.localStorage.setItem('Contacts', JSON.stringify(contacts));
+  }, [contacts]);
 
-  addContact = ({ id, name, number }) => {
-    const { contacts } = this.state;
+  const addContact = ({ id, name, number }) => {
     if (
       contacts.find(
         contact => contact.name.toLowerCase() === name.toLowerCase()
       )
     )
-     { return  Notiflix.Notify.failure(`${name} is already in phonebook`) };
-    
-    this.setState(prevState => {
-      return { contacts: [...prevState.contacts, { id, name, number }] };
-    });
+      return Notiflix.Notify.failure(`${name} is already in phonebook`);
+    setContacts([...contacts, { id, name, number }]);
   };
 
-  removeContact = id => {
-    this.setState(prevState => ({
-      contacts: prevState.contacts.filter(contact => contact.id !== id),
-    }));
+  const removeContact = id => {
+    setContacts(contacts.filter(contact => contact.id !== id));
   };
 
-  getContacts = () => {
-    const { filter, contacts } = this.state;
-    const filterNormalize = filter.toLowerCase();
+  const getContacts = () => {
+    const normalizedFilter = filter.toLowerCase();
     return contacts.filter(contact =>
-      contact.name.toLowerCase().includes(filterNormalize)
+      contact.name.toLowerCase().includes(normalizedFilter)
     );
   };
 
-  filterContacts = element => {
-    this.setState({ filter: element.currentTarget.value });
+  const filterContacts = element => {
+    setFilter(element.currentTarget.value);
   };
 
-  render() {
-    const { filter } = this.state;
-    return (
-      <div className="container">
-      <>
-        <h1>Phonebook</h1>
-        <ContactForm onSubmitData={this.addContact} />
-        <h2>Contacts</h2>
-        <Filter value={filter} onChange={this.filterContacts} />
-        <ContactsList
-          contacts={this.getContacts()}
-          handleRemove={this.removeContact}
-        />
-        </>
-        </div>
-    );
-  }
-}
+  return (
+    <>
+      <h1>Phonebook</h1>
+      <ContactForm onSubmitData={addContact} />
+      <h2>Contacts</h2>
+      <Filter value={filter} onChange={filterContacts} />
+      <ContactsList contacts={getContacts()} handleRemove={removeContact} />
+    </>
+  );
+};
