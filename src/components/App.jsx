@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import { ContactForm } from './СontactForm';
-import { ContactsList } from './СontactList';
-import { Filter } from './СontactFilter';
+import { ContactForm } from './contactForm';
+import { ContactsList } from './contactList';
+import { Filter } from './contactFilter';
 import Notiflix from 'notiflix';
 
 const defaultContacts = [
@@ -27,7 +27,7 @@ export const App = () => {
         contact => contact.name.toLowerCase() === name.toLowerCase()
       )
     )
-      return Notiflix.Notify.failure(`${name} is already in phonebook`);
+      { return Notiflix.Notify.failure(`${name} is already in phonebook`) };
     setContacts([...contacts, { id, name, number }]);
   };
 
@@ -47,12 +47,14 @@ export const App = () => {
   };
 
   return (
+    <div className="container">
     <>
       <h1>Phonebook</h1>
       <ContactForm onSubmitData={addContact} />
       <h2>Contacts</h2>
       <Filter value={filter} onChange={filterContacts} />
       <ContactsList contacts={getContacts()} handleRemove={removeContact} />
-    </>
+      </>
+      </div>
   );
 };
